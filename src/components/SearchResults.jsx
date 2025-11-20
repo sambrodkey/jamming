@@ -1,10 +1,13 @@
 import Tracklist from './Tracklist';
 
-const SearchResults = ({ tracks }) => {
+const SearchResults = ({ tracks, onAdd }) => {
     return (
         <div>
             <h2>Results</h2>
-            <Tracklist tracks={tracks} />
+            <Tracklist
+                tracks={tracks}
+                onAdd={onAdd}
+            />
         </div>
     );
 };

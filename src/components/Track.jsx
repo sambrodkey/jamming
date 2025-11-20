@@ -1,11 +1,19 @@
-const Track = ({ name, artist, album }) => {
+const Track = ({ track, onAdd, onRemove }) => {
+    const handleAdd = () => {
+        onAdd(track);
+    };
+
+    const handleRemove = () => {
+        onRemove(track);
+    };
+
     return (
         <div>
             <p>
-                {name} by {artist} - {album}
+                {track.name} by {track.artist} - {track.album}
             </p>
-            <button>Add</button>
-            <button>Remove</button>
+            {onAdd && <button onClick={handleAdd}>+</button>}
+            {onRemove && <button onClick={handleRemove}>-</button>}
         </div>
     );
 };

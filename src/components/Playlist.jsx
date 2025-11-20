@@ -1,6 +1,6 @@
 import Tracklist from './Tracklist';
 
-const Playlist = ({ playlistName, onNameChange, tracks }) => {
+const Playlist = ({ playlistName, onNameChange, tracks, onRemove }) => {
     const handleChange = (event) => {
         onNameChange(event.target.value);
     };
@@ -15,7 +15,10 @@ const Playlist = ({ playlistName, onNameChange, tracks }) => {
                     onChange={handleChange}
                 />
             </div>
-            <Tracklist tracks={tracks} />
+            <Tracklist
+                tracks={tracks}
+                onRemove={onRemove}
+            />
             <button>Save to Spotify</button>
         </div>
     );

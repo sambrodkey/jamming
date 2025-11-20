@@ -17,15 +17,33 @@ function App() {
         { id: 102, name: 'Playlist Song 2', artist: 'Artist Y', album: 'Album B' },
     ]);
 
+    const addTrack = (track) => {
+        // Check if the track is already in the playlist
+        if (playlistTracks.find((savedTrack) => savedTrack.id === track.id)) {
+            return; // Already in playlist, do nothing
+        }
+        // Add the new track
+        setPlaylistTracks([...playlistTracks, track]);
+    };
+
+    const removeTrack = (track) => {
+        const updatedTracks = playlistTracks.filter((savedTrack) => savedTrack.id !== track.id);
+        setPlaylistTracks(updatedTracks);
+    };
+
     return (
         <div className="App">
             <h1>Jammming</h1>
             <SearchBar />
-            <SearchResults tracks={searchResults} />
+            <SearchResults
+                tracks={searchResults}
+                onAdd={addTrack}
+            />
             <Playlist
                 tracks={playlistTracks}
                 onNameChange={setPlaylistName}
                 playlistName={playlistName}
+                onRemove={removeTrack}
             />
         </div>
     );
