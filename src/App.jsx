@@ -10,7 +10,7 @@ function App() {
         { id: 3, name: 'Song 3', artist: 'Artist C', album: 'Album C' },
     ]);
 
-    const [playlistName, setPlaylistName] = useState('My Playlist');
+    const [playlistName, setPlaylistName] = useState('My Playlist: click to rename');
 
     const [playlistTracks, setPlaylistTracks] = useState([
         { id: 101, name: 'Playlist Song 1', artist: 'Artist X', album: 'Album A' },
@@ -31,6 +31,20 @@ function App() {
         setPlaylistTracks(updatedTracks);
     };
 
+    const savePlaylist = () => {
+        // extract URIs from playlist tracks
+        const trackURIs = playlistTracks.map((track) => track.uri);
+
+        // 2. Mock saving (just log to console for now)
+        console.log('Saving playlist to Spotify...');
+        console.log('Playlist Name:', playlistName);
+        console.log('Track URIs:', trackURIs);
+
+        // 3. Reset playlist state
+        setPlaylistName('New Playlist');
+        setPlaylistTracks([]);
+    };
+
     return (
         <div className="App">
             <h1>Jammming</h1>
@@ -44,6 +58,7 @@ function App() {
                 onNameChange={setPlaylistName}
                 playlistName={playlistName}
                 onRemove={removeTrack}
+                onSave={savePlaylist}
             />
         </div>
     );
