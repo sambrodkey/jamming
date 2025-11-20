@@ -10,6 +10,8 @@ function App() {
         { id: 3, name: 'Song 3', artist: 'Artist C', album: 'Album C' },
     ]);
 
+    const [playlistName, setPlaylistName] = useState('My Playlist');
+
     const [playlistTracks, setPlaylistTracks] = useState([
         { id: 101, name: 'Playlist Song 1', artist: 'Artist X', album: 'Album A' },
         { id: 102, name: 'Playlist Song 2', artist: 'Artist Y', album: 'Album B' },
@@ -20,7 +22,11 @@ function App() {
             <h1>Jammming</h1>
             <SearchBar />
             <SearchResults tracks={searchResults} />
-            <Playlist tracks={playlistTracks} />
+            <Playlist
+                tracks={playlistTracks}
+                onNameChange={setPlaylistName}
+                playlistName={playlistName}
+            />
         </div>
     );
 }
