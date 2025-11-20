@@ -1,17 +1,11 @@
 import Track from './Track';
 
-const Tracklist = () => {
-    const mockTracks = [
-        { trackName: 'Song 1', artist: 'Artist A', album: 'Album A' },
-        { trackName: 'Song 2', artist: 'Artist B', album: 'Album B' },
-        { trackName: 'Song 3', artist: 'Artist C', album: 'Album C' },
-    ];
-
+const Tracklist = ({ tracks }) => {
     return (
         <div>
-            {mockTracks.map((track, index) => (
+            {tracks.map((track) => (
                 <Track
-                    key={index}
+                    key={track.id}
                     {...track}
                 />
             ))}
