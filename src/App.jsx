@@ -1,7 +1,10 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Callback from './components/Callback';
 import { useState } from 'react';
 import SearchBar from './components/SearchBar';
 import SearchResults from './components/SearchResults';
 import Playlist from './components/Playlist';
+import Spotify from './utils/spotify';
 
 function App() {
     const [searchResults, setSearchResults] = useState([
@@ -32,35 +35,48 @@ function App() {
     };
 
     const savePlaylist = () => {
-        // extract URIs from playlist tracks
-        const trackURIs = playlistTracks.map((track) => track.uri);
+        const trackURIs = playlistTracks.map((track) => track.uri); // make sure each track has a `uri`
 
-        // 2. Mock saving (just log to console for now)
-        console.log('Saving playlist to Spotify...');
-        console.log('Playlist Name:', playlistName);
-        console.log('Track URIs:', trackURIs);
-
-        // 3. Reset playlist state
-        setPlaylistName('New Playlist');
-        setPlaylistTracks([]);
+        Spotify.savePlaylist(playlistName, trackURIs)
+            .then(() => {
+                console.log('Playlist saved to Spotify!');
+                // Reset playlist state
+                setPlaylistName('New Playlist');
+                setPlaylistTracks([]);
+            })
+            .catch((err) => console.error(err));
     };
 
     return (
-        <div className="App">
-            <h1>Jammming</h1>
-            <SearchBar />
-            <SearchResults
-                tracks={searchResults}
-                onAdd={addTrack}
-            />
-            <Playlist
-                tracks={playlistTracks}
-                onNameChange={setPlaylistName}
-                playlistName={playlistName}
-                onRemove={removeTrack}
-                onSave={savePlaylist}
-            />
-        </div>
+        <Router>
+            <Routes>
+                <Route
+                    path="/"
+                    element={
+                        <div className="App">
+                            <h1>Jammming</h1>
+                            <SearchBar />
+                            <SearchResults
+                                tracks={searchResults}
+                                onAdd={addTrack}
+                            />
+                            <Playlist
+                                tracks={playlistTracks}
+                                onNameChange={setPlaylistName}
+                                playlistName={playlistName}
+                                onRemove={removeTrack}
+                                onSave={savePlaylist}
+                            />
+                            <button onClick={() => Spotify.authorize()}>Login to Spotify</button>
+                        </div>
+                    }
+                />
+                <Route
+                    path="/callback"
+                    element={<Callback />}
+                />
+            </Routes>
+        </Router>
     );
 }
 
