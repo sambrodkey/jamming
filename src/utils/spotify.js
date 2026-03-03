@@ -1,4 +1,4 @@
-let accessToken = null;
+let accessToken = localStorage.getItem('spotifyAccessToken') || null;
 let tokenExpirationTime = null;
 
 // Check if a token is already in localStorage
@@ -6,6 +6,9 @@ let tokenExpirationTime = null;
 // if (savedToken) accessToken = savedToken;
 
 const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+
+console.log('Client ID:', clientId);
+
 const redirectUri = 'http://127.0.0.1:5173/callback';
 const scopes = 'playlist-modify-public playlist-modify-private';
 
@@ -13,6 +16,8 @@ const Spotify = {
     // Step 1: Redirect user to Spotify login
     authorize() {
         const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`;
+        navigator.clipboard.writeText(authUrl);
+        console.log('Auth URL copied to clipboard');
         window.location = authUrl;
     },
 
@@ -35,6 +40,34 @@ const Spotify = {
             .catch((err) => {
                 console.error('Error fetching access token:', err);
                 return null;
+            });
+    },
+
+    // Search tracks on Spotify
+    search(term) {
+        if (!accessToken) {
+            console.error('No access token. User must log in first.');
+            return Promise.resolve([]);
+        }
+
+        return fetch(`https://api.spotify.com/v1/search?type=track&q=${encodeURIComponent(term)}`, {
+            headers: { Authorization: `Bearer ${accessToken}` },
+        })
+            .then((res) => res.json())
+            .then((data) => {
+                if (!data.tracks) return [];
+                return data.tracks.items.map((track) => ({
+                    id: track.id,
+                    name: track.name,
+                    artist: track.artists[0].name,
+                    album: track.album.name,
+                    uri: track.uri,
+                    image: track.album.images[2]?.url || track.album.images[0]?.url,
+                }));
+            })
+            .catch((err) => {
+                console.error('Error searching tracks:', err);
+                return [];
             });
     },
 
