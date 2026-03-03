@@ -1,5 +1,4 @@
 let accessToken = localStorage.getItem('spotifyAccessToken') || null;
-let tokenExpirationTime = null;
 
 // Check if a token is already in localStorage
 // const savedToken = localStorage.getItem('spotifyAccessToken');
@@ -34,7 +33,10 @@ const Spotify = {
             .then((res) => res.json())
             .then((data) => {
                 accessToken = data.access_token;
-                tokenExpirationTime = Date.now() + data.expires_in * 1000;
+
+                // Save token
+                localStorage.setItem('spotifyAccessToken', accessToken);
+
                 return accessToken;
             })
             .catch((err) => {
