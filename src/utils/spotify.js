@@ -1,8 +1,17 @@
-let accessToken = localStorage.getItem('spotifyAccessToken') || null;
+let accessToken = localStorage.getItem('spotifyAccessToken');
+let tokenExpirationTime = localStorage.getItem('spotifyTokenExpiry');
 
-// Check if a token is already in localStorage
-// const savedToken = localStorage.getItem('spotifyAccessToken');
-// if (savedToken) accessToken = savedToken;
+const isTokenExpired = () => {
+    if (!tokenExpirationTime) return true;
+    return Date.now() > parseInt(tokenExpirationTime);
+};
+
+const clearToken = () => {
+    accessToken = null;
+    tokenExpirationTime = null;
+    localStorage.removeItem('spotifyAccessToken');
+    localStorage.removeItem('spotifyTokenExpiry');
+};
 
 const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
 
@@ -14,15 +23,16 @@ const scopes = 'playlist-modify-public playlist-modify-private';
 const Spotify = {
     // Step 1: Redirect user to Spotify login
     authorize() {
+        const searchTerm = document.querySelector('input[type="text"]')?.value;
+        if (searchTerm) sessionStorage.setItem('pendingSearch', searchTerm);
         const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`;
-        navigator.clipboard.writeText(authUrl);
-        console.log('Auth URL copied to clipboard');
         window.location = authUrl;
     },
-
     // Step 2: Exchange code for access token
     getAccessToken(code) {
-        if (accessToken) return Promise.resolve(accessToken);
+        if (accessToken && !isTokenExpired()) return Promise.resolve(accessToken);
+
+        if (isTokenExpired()) clearToken();
 
         if (!code) {
             console.error('No code provided to getAccessToken');
@@ -33,10 +43,10 @@ const Spotify = {
             .then((res) => res.json())
             .then((data) => {
                 accessToken = data.access_token;
-
-                // Save token
+                const expiresAt = Date.now() + (data.expires_in - 60) * 1000;
                 localStorage.setItem('spotifyAccessToken', accessToken);
-
+                localStorage.setItem('spotifyTokenExpiry', expiresAt);
+                tokenExpirationTime = expiresAt;
                 return accessToken;
             })
             .catch((err) => {
@@ -47,8 +57,9 @@ const Spotify = {
 
     // Search tracks on Spotify
     search(term) {
-        if (!accessToken) {
-            console.error('No access token. User must log in first.');
+        if (isTokenExpired()) {
+            clearToken();
+            console.error('Token expired. Please log in again.');
             return Promise.resolve([]);
         }
 
@@ -74,9 +85,10 @@ const Spotify = {
     },
 
     savePlaylist(playlistName, trackUris) {
-        if (!accessToken) {
-            console.error('No access token. User must log in first.');
-            return Promise.reject('No access token');
+        if (isTokenExpired()) {
+            clearToken();
+            console.error('Token expired. Please log in again.');
+            return Promise.reject('Token expired');
         }
 
         return fetch('https://api.spotify.com/v1/me', {
